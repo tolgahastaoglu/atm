@@ -1,0 +1,294 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 29 00:07:16 2020
+
+@author: tolga
+"""
+
+## Deneme amaçlı yazılmış ATM uygulama programıdır
+import requests
+from bs4 import BeautifulSoup
+import json
+print("Bu program Tolga HASTAOĞLU tarafından can sıkıntısından Yazılmıştır")
+print("")
+print("")
+# def veritabanı():
+
+def ATM():
+    
+    with open("cash.json") as cash:
+        data=json.load(cash)
+        global nakit
+        nakit=(data["TL"])
+        global dnakit
+        dnakit=(data["Dolar"])
+        global enakit
+        enakit=(data["Euro"])
+        global yatırım
+        yatırım=(data["Yatirim"])
+        
+        # print(nakit,dnakit,enakit,yatırım)
+    global sans
+    sans=3
+    global pin
+    pin=2526      
+    url = "https://altin.in/"
+    req = requests.get(url)
+    context = req.content
+    soup = BeautifulSoup(context, "html.parser")
+# Altın.in sitesinden Dolar ve Euro fiyatı derleme 
+#dfiy dolar ve efiy euro için kullanılıyor
+    for i in soup.find_all(id="dfiy"):
+        d=i.text
+        dolarsatıs=float(d)
+    for i in soup.find_all(id="efiy"):
+            e=i.text
+            eurosatıs=float(e)
+           
+    dolaralıs=dolarsatıs*1.0075
+    euroalıs=eurosatıs*1.0075 
+    print("       TolgaBank ATM Hoşgeldiniz        ")
+    giris=int(input("Lütfen Pin Kodunuzu Giriniz: "))
+    while True:
+        if sans>1:
+            if giris==pin:
+                print("")
+                print("Bakiyenizi Öğrenmek İçin 1'e Basınız: ")
+                print("Para çekmek için 2'ye Basınız: ")
+                print("Yatırım Hesabına Para Göndermek için 3'e Basınız: ")
+                print("Döviz Menüsüne Gitmek için 4'e Basınız: ")
+                print("Yatırım Hesabına Geçmek için 5'e basınız")
+                print("Kartınızı Almak için 6'ya Basınız: ")
+               
+                secim=int(input("Lütfen Seçimizi Yapınız: "))
+                    
+                if secim==1:
+                  print("")
+                  print("TL     %f"%nakit)
+                  print("DL     %f"%dnakit)
+                  print("EU     %f"%enakit)
+                  print("YT     %f"%yatırım)
+                  print("")
+                elif secim==2:
+                  Paracek=float(input("Lütfen Çekmek İstediğiniz Miktarı Giriniz: "))
+                  if Paracek<=nakit and Paracek % 10 == 0:
+                      sonbakiye=nakit-Paracek
+                      nakit=sonbakiye
+                      with open("cash.json",mode="w") as cash:    
+                          yeni={"TL":nakit,"Dolar":dnakit,"Euro":enakit,"Yatirim":yatırım}
+                          json.dump(yeni,cash)
+                      print("")
+                      print("Bakiyenizden Çektiğiniz Miktar %d ve Kalan Bakiye %d 'dir" %(Paracek,sonbakiye))
+                      print("")
+                  elif Paracek<=nakit and Paracek%10!=0:
+                      print("")
+                      print("Lütfen 10 TL ve Katlarını Giriniz: ")
+                      print("")
+                  elif Paracek>nakit:    
+                      print("")
+                      print("Bakiyeniz yeterli Değildir, Çekilebilecek Miktar %d TL'dir" %nakit)
+                      print("")
+                  
+                elif secim==3:
+                    yatır=float(input("Lütfen Yatırım Hesabına Göndermek İstediğiniz Miktarı Giriniz: "))
+                    if yatır<=nakit:
+                        kalanbakiye=nakit-yatırım
+                        nakit=kalanbakiye
+                        yatırım=yatır+yatırım
+                        with open("cash.json",mode="w") as cash:    
+                          yeni={"TL":nakit,"Dolar":dnakit,"Euro":enakit,"Yatirim":yatırım}
+                          json.dump(yeni,cash)
+                        print("")
+                        print("Bakiyenizden Yatırım Heabınıza Gönderdiğiniz Miktar %d ve Kalan Bakiye %d TL'dir" %(yatırım,kalanbakiye))
+                        print("")
+                    else:
+                        print("")
+                        print("Bakiyeniz yeterli Değildir, Gönderilebilecek  Miktar %d TL'dir" %nakit) 
+                        print("")
+                elif secim==4:
+                    while True:
+                        print("")
+                        print("")
+                        print("Döviz Kurunu Öğrenmek için 1'e Basınız:")
+                        print("Döviz Almak için 2'ye Basınız:")
+                        print("Döviz Satmak için 3'e Basınız:")
+                        print("Bir üst menüye gitmek için 4'e Basınız:")
+                        print("")
+                        print("")
+                        dovizDurum=float(input("Lütfen Yapmak İstediğiniz İşlemi Seçiniz: "))
+                        if dovizDurum==1:
+                          print("")
+                          print("        Satış               Alış")
+                          print("Dolar: %f           %f" %(dolarsatıs,dolaralıs))
+                          print("Euro:  %f           %f"%(eurosatıs,euroalıs))
+                          print("") 
+                        elif dovizDurum==2:
+                            print("")
+                            dovizAlıs=input("Dolar Almak için d, Euro Almak için e Tuşuna Basınız: ")
+                            print("")
+                            if (dovizAlıs=="E" or dovizAlıs=="e"):
+                                print("")
+                                eurotutar=float(input("Almak İstediğiniz Euro Miktarını Giriniz: "))
+                                print("")
+                                eAlısTL=eurotutar*euroalıs
+                               
+                                if eAlısTL<=nakit:
+                                    enakit=enakit+eurotutar
+                                    nakit=nakit-(eurotutar*euroalıs)
+                                    with open("cash.json",mode="w") as cash:    
+                                        yeni={"TL":nakit,"Dolar":dnakit,"Euro":enakit,"Yatirim":yatırım}
+                                        json.dump(yeni,cash)
+                                    print("")
+                                    print("%f Euro Satın Aldınız, Hesabınızda kalan Tutar %f TL'dir"%(eurotutar,nakit))
+                                    print("Hesabınızda %f Euro vardır:"%enakit)
+                                else:
+                                    print("")
+                                    print("Bu işlemi yapabilecek nakitiniz yoktur,Alabileceğiniz maksimum Tutar %f Eurodur."%(nakit/euroalıs))
+                                    print("")
+                            elif dovizAlıs=="D" or dovizAlıs=="d":
+                                print("")
+                                dolartutar=float(input("Lütfen Almak İstediğiniz Dolar Miktarını Giriniz: "))
+                                print("")
+                                dAlısTL=dolartutar*dolaralıs
+                                if dAlısTL<=nakit:    
+                                    dnakit=dnakit+dolartutar
+                                    nakit=nakit-(dolartutar*dolaralıs)
+                                    with open("cash.json",mode="w") as cash:    
+                                        yeni={"TL":nakit,"Dolar":dnakit,"Euro":enakit,"Yatirim":yatırım}
+                                        json.dump(yeni,cash)
+                                    print("")
+                                    print("%f Dolar Satın Aldınız,Hesabınızda kalan Tutar %f TL'dir"%(dolartutar,nakit))
+                                    print("Hesabınızda %f Dolar vardır:"%dnakit)
+                                else:
+                                    print("")
+                                    print("")
+                                    print("Bu işlemi yapabilecek nakitiniz yoktur,Alabileceğiniz maksimum Tutar %f ."%(nakit/dolaralıs))
+                                    print("")
+                                    print("")
+                            else:
+                                print("")
+                                print("")
+                                print("Lütfen Geçerli Bir Seçim Yapınız:")
+                                print("")
+                                print("")
+                        elif dovizDurum==3:
+                            print("")
+                            dovizSatıs=input("Dolar Satmak için d, Euro Satmak için e Tuşuna Basınız: ")
+                            print("")
+                            if dovizSatıs=="D" or dovizSatıs=="d":
+                                print("Hesabınızda %f Dolar Vardır"%dnakit)
+                                dSatıs=float(input("Lütfen Satmak İstediğiniz Dolar Miktarını Giriniz: "))
+                                print("")
+                                if dSatıs<=dnakit:
+                                  
+                                    dnakit=dnakit-dSatıs
+                                    nakit=nakit+(dSatıs*dolarsatıs)
+                                    with open("cash.json",mode="w") as cash:    
+                                        yeni={"TL":nakit,"Dolar":dnakit,"Euro":enakit,"Yatirim":yatırım}
+                                        json.dump(yeni,cash)
+                                    print("%f Dolar Satış Yaptınız, Hesabınızda kalan tutar %f TL'dir"%(dSatıs,nakit))
+                                    print("Hesabınızda %f Dolar Vardır"%dnakit)
+                                else:
+                                    print("")
+                                    print("")
+                                    print("Yeterli Dolarınız Yoktur, Satış Yapabileceğiniz Miktar %f Dolardır" %(dnakit))
+                                    print("")
+                                    print("")
+                            elif dovizSatıs=="E" or dovizSatıs=="e":
+                                print("Hesabınızda %f Euro Vardır"%enakit)
+                                eSatıs=float(input("Lütfen Satmak İstediğiniz Euro Miktarını Giriniz: "))
+                                if eSatıs<=enakit:
+                                    print("Hesabınızda %f Euro Vardır"%enakit)
+                                    enakit=enakit-eSatıs
+                                    nakit=nakit+(eSatıs*eurosatıs)
+                                    with open("cash.json",mode="w") as cash:    
+                                        yeni={"TL":nakit,"Dolar":dnakit,"Euro":enakit,"Yatirim":yatırım}
+                                        json.dump(yeni,cash)
+                                    print("")
+                                    print("%f Euro Satış Yaptınız, Hesabınızda kalan tutar %f TL'dir"%(eSatıs,nakit))
+                                    print("Hesabınızda %f Euro Vardır"%enakit)
+                                else:
+                                    print("")
+                                    print("")
+                                    print("Yeterli Euronuz Yoktur, Satış Yapabileceğiniz Miktar %f Eurodur" %(enakit))
+                                    print("")
+                                    print("")
+                            else:
+                                print("")
+                                print("")
+                                print("Lütfen Geçerli Seçim Yapınız:")
+                                print("")
+                                print("")
+                        elif dovizDurum==4:
+                            print("")
+                            print("")
+                            print("Bir Üst Menüye yönlendiriliyorsunuz...")
+                            print("")
+                            print("")
+                            break 
+                elif secim==5:
+                    yatırım_hesap()
+                elif secim==6:
+                    print("")
+                    print("Kartınız verilmektedir...")
+                    print("")
+                    print("")
+                    print("Bizi Tercih Ettiğiniz için Teşekkür Ederiz.")
+                    break
+               
+                else:
+                    print("")
+                    print("Lütfen Doğru Seçim Yapınız")
+                   
+            else: 
+                sans-=1
+                giris=int(input("Lütfen Pin Kodunuzu Tekrar Giriniz: "))
+        else:
+            print("")
+            print("Pin Kodunuzu 3 Kez Yanlış Girdiniz.")
+            print("")
+            break
+def yatırım_hesap():
+    url = "http://bigpara.hurriyet.com.tr/borsa/canli-borsa/"
+    req = requests.get(url)
+    context = req.content
+    soup = BeautifulSoup(context, "html.parser")
+    
+    while True:
+        if yatırım>0:
+            print("")
+            print("Yatırım Hesabına Hoşgeldiniz")
+            print("Hisse Senedi İsimlerini görmek için 1'e basınız:")
+            print("Hisse Senedi Satın Almak için 2'ye basınız:")
+            print("Hisse Senedi Satmak için 3'e basınız:")
+            print("Ana Ekrana Dönmek için 4'e Basınız:")
+            ysecim=int(input("Lütfen Yapmak İstediğiniz İşlemi Seçiniz: "))
+            if ysecim==1:
+                print("Hisse Senedi İsimleri")
+            elif ysecim==2:
+                ide=input("LütFen görmek istediğiniz Hissenin 5 harfli Kodunu Giriniz: ")
+                for i in soup.find_all(id=("h_td_alis_id_"+ide)):
+                    balıs=i.text
+                    balıs=balıs.replace(",",".")
+                    borsa_alıs=float(balıs)
+                    balisMiktar=float(input("Lütfen Almak İstediğiniz Lot Sayısını Giriniz: "))
+                    balisTutar=borsa_alıs*balisMiktar
+                    if balisTutar<=yatırım:
+                        print("%s hissesinden %f Lot satın alınmıştır."%(ide,balisMiktar))
+                        yatırım==yatırım-balisTutar
+            elif ysecim==3:
+                ide=input("LütFen görmek istediğiniz Hissenin 5 harfli Kodunu Giriniz: ")
+                for i in soup.find_all(id=("h_td_satis_id_"+ide)):
+                    bsatis=i.text
+                    bsatis=bsatis.replace(",",".")       
+                borsa_satis=float(bsatis)
+            elif ysecim==4:
+                print("çıkış yapılıyot")
+                break
+        else:
+            print("Yeterli yatırım paranız yoktur")
+            break
+           
+        
+ATM()
+        
